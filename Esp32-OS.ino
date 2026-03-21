@@ -14,6 +14,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define VRY_PIN 35
 #define BTN_SELECT 32
 #define BTN_BACK 25
+#define BUZZER 33
 
 // State
 enum ScreenState { MAIN_MENU, GAMES_MENU, SETTINGS_MENU, WIFI_MENU, INFO_SCREEN, GAME_SCREEN };
@@ -26,30 +27,17 @@ int selectedGame = 0;
 Preferences prefs;
 int highScore = 0;
 
+// Idle / clock
+unsigned long lastActivity = 0;
+int displayTimeout = 10000;
+bool dimmed = false;
+
+// Clock settings
+int clockMode = 0; // 0 digital, 1 analog
+
 // Menu
 String mainMenu[] = {"Games", "WiFi", "Settings", "Info"};
 String gamesMenu[] = {"Snake", "Pong", "Flappy"};
-
-// Function declarations
-void drawMenu(String menu[], int size);
-void handleInput();
-void drawScreen();
-
-// External functions
-void initSnake();
-void updateSnake();
-void drawSnake();
-
-void initPong();
-void updatePong();
-void drawPong();
-
-void initFlappy();
-void updateFlappy();
-void drawFlappy();
-
-void scanWiFi();
-void drawWiFi();
 
 void setup() {
   Serial.begin(115200);
@@ -64,17 +52,41 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(2);
   display.setCursor(10, 20);
-  display.println("ESP32");
-  display.setCursor(10, 40);
-  display.println("BOY");
+  display.println("ESP32 BOY");
   display.display();
   delay(1500);
 
   prefs.begin("game", false);
   highScore = prefs.getInt("high", 0);
+
+  initSound();
+  lastActivity = millis();
 }
 
 void loop() {
+
+  // Idle detection
+  if (millis() - lastActivity > displayTimeout) {
+    dimmed = true;
+  } else {
+    dimmed = false;
+  }
+
+  // Dim control
+  display.ssd1306_command(SSD1306_SETCONTRAST);
+  display.ssd1306_command(dimmed ? 10 : 255);
+
+  // Show clock when idle
+  if (dimmed) {
+    display.clearDisplay();
+
+    if (clockMode == 0) drawDigitalClock();
+    else drawAnalogClock();
+
+    display.display();
+    return;
+  }
+
   handleInput();
   drawScreen();
 }

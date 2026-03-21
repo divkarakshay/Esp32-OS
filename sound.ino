@@ -12,9 +12,9 @@ void beep(int freq, int duration) {
 }
 
 void playEatSound() {
-  beep(1000, 50);
+  beep(1200, 50);
 }
 
 void playGameOverSound() {
-  beep(500, 200);
+  beep(400, 200);
 }
