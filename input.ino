@@ -12,7 +12,6 @@ void handleInput() {
       else if (selectedIndex == 1) { currentScreen = WIFI_MENU; scanWiFi(); }
       else if (selectedIndex == 2) currentScreen = SETTINGS_MENU;
       else if (selectedIndex == 3) currentScreen = INFO_SCREEN;
-
       selectedIndex = 0;
     }
     else if (currentScreen == GAMES_MENU) {
@@ -22,6 +21,9 @@ void handleInput() {
       if (selectedGame == 0) initSnake();
       if (selectedGame == 1) initPong();
       if (selectedGame == 2) initFlappy();
+    }
+    else if (currentScreen == SETTINGS_MENU) {
+      handleSettings();
     }
 
     delay(200);

@@ -27,17 +27,18 @@ int selectedGame = 0;
 Preferences prefs;
 int highScore = 0;
 
-// Idle / clock
+// Idle
 unsigned long lastActivity = 0;
 int displayTimeout = 10000;
 bool dimmed = false;
 
-// Clock settings
-int clockMode = 0; // 0 digital, 1 analog
+// Clock
+int clockMode = 0;
 
-// Menu
+// Menus
 String mainMenu[] = {"Games", "WiFi", "Settings", "Info"};
 String gamesMenu[] = {"Snake", "Pong", "Flappy"};
+String settingsMenu[] = {"Clock Style", "Timeout"};
 
 void setup() {
   Serial.begin(115200);
@@ -48,7 +49,6 @@ void setup() {
   Wire.begin(21, 22);
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
-  // Boot screen
   display.clearDisplay();
   display.setTextSize(2);
   display.setCursor(10, 20);
@@ -65,24 +65,16 @@ void setup() {
 
 void loop() {
 
-  // Idle detection
-  if (millis() - lastActivity > displayTimeout) {
-    dimmed = true;
-  } else {
-    dimmed = false;
-  }
+  if (millis() - lastActivity > displayTimeout) dimmed = true;
+  else dimmed = false;
 
-  // Dim control
   display.ssd1306_command(SSD1306_SETCONTRAST);
   display.ssd1306_command(dimmed ? 10 : 255);
 
-  // Show clock when idle
   if (dimmed) {
     display.clearDisplay();
-
     if (clockMode == 0) drawDigitalClock();
     else drawAnalogClock();
-
     display.display();
     return;
   }

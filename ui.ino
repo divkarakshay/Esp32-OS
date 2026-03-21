@@ -22,7 +22,6 @@ void drawMenu(String menu[], int size) {
 void drawScreen() {
   display.clearDisplay();
 
-  // Header
   display.fillRect(0, 0, 128, 10, WHITE);
   display.setTextColor(BLACK);
   display.setCursor(5, 1);
@@ -36,6 +35,10 @@ void drawScreen() {
 
     case GAMES_MENU:
       drawMenu(gamesMenu, 3);
+      break;
+
+    case SETTINGS_MENU:
+      drawMenu(settingsMenu, 2);
       break;
 
     case WIFI_MENU:

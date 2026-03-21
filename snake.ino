@@ -24,6 +24,11 @@ void updateSnake() {
     gameOver=true;
     playGameOverSound();
     saveGame(0, score);
+
+    if(score > highScore){
+      highScore = score;
+      prefs.putInt("high", highScore);
+    }
   }
 
   if(sx[0]==fx && sy[0]==fy){
