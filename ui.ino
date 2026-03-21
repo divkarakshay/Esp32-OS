@@ -1,60 +1,45 @@
-void drawMenu(String menu[], int size) {
-  if (selectedIndex < 0) selectedIndex = size - 1;
-  if (selectedIndex >= size) selectedIndex = 0;
+void drawIcon(int x,int y,int t){
+  if(t==0) display.drawRect(x,y,8,8,WHITE);
+  if(t==1) display.drawCircle(x+4,y+4,3,WHITE);
+  if(t==2) display.drawLine(x,y,x+8,y+8,WHITE);
+  if(t==3) display.drawPixel(x+4,y+4,WHITE);
+}
 
-  for (int i = 0; i < size; i++) {
-    int y = i * 12 + 12;
+void drawMenu(String m[],int size){
+  if(selectedIndex<0) selectedIndex=size-1;
+  if(selectedIndex>=size) selectedIndex=0;
 
-    if (i == selectedIndex) {
-      display.fillRect(0, y, 128, 10, WHITE);
+  smoothIndex+=(selectedIndex-smoothIndex)*0.2;
+
+  for(int i=0;i<size;i++){
+    int y=(i*12+12)-(smoothIndex*12);
+
+    if(i==selectedIndex){
+      display.fillRect(0,y,128,10,WHITE);
       display.setTextColor(BLACK);
-    } else {
-      display.setTextColor(WHITE);
-    }
+    }else display.setTextColor(WHITE);
 
-    display.setCursor(5, y);
-    display.println(menu[i]);
+    drawIcon(2,y,i);
+    display.setCursor(15,y);
+    display.println(m[i]);
   }
-
   display.setTextColor(WHITE);
 }
 
-void drawScreen() {
+void drawScreen(){
   display.clearDisplay();
 
-  display.fillRect(0, 0, 128, 10, WHITE);
-  display.setTextColor(BLACK);
-  display.setCursor(5, 1);
-  display.println("ESP32 BOY");
-  display.setTextColor(WHITE);
+  switch(currentScreen){
 
-  switch (currentScreen) {
-    case MAIN_MENU:
-      drawMenu(mainMenu, 4);
-      break;
-
-    case GAMES_MENU:
-      drawMenu(gamesMenu, 3);
-      break;
-
-    case SETTINGS_MENU:
-      drawMenu(settingsMenu, 2);
-      break;
-
-    case WIFI_MENU:
-      drawWiFi();
-      break;
-
-    case INFO_SCREEN:
-      display.setCursor(10, 30);
-      display.println("Mini OS Ready");
-      break;
+    case MAIN_MENU: drawMenu(mainMenu,4); break;
+    case GAMES_MENU: drawMenu(gamesMenu,3); break;
+    case SETTINGS_MENU: drawMenu(settingsMenu,3); break;
+    case WIFI_MENU: drawWiFi(); return;
+    case KEYBOARD_SCREEN: drawKeyboard(); return;
 
     case GAME_SCREEN:
-      if (selectedGame == 0) { updateSnake(); drawSnake(); }
-      if (selectedGame == 1) { updatePong(); drawPong(); }
-      if (selectedGame == 2) { updateFlappy(); drawFlappy(); }
-      break;
+      runGame();
+      return;
   }
 
   display.display();

@@ -1,23 +1,39 @@
 #include <math.h>
 
-int hours=10, minutes=30;
+void drawDigitalClock() {
+  struct tm t;
+  if (!getLocalTime(&t)) return;
 
-void drawDigitalClock(){
   display.setTextSize(2);
-  display.setCursor(20,25);
-  display.print(hours);
+  display.setCursor(20, 25);
+
+  if (t.tm_hour < 10) display.print("0");
+  display.print(t.tm_hour);
   display.print(":");
-  if(minutes<10) display.print("0");
-  display.print(minutes);
+
+  if (t.tm_min < 10) display.print("0");
+  display.print(t.tm_min);
 }
 
-void drawAnalogClock(){
-  int cx=64, cy=32;
-  display.drawCircle(cx,cy,20,WHITE);
+void drawAnalogClock() {
+  struct tm t;
+  if (!getLocalTime(&t)) return;
 
-  float a=(hours%12)*30*PI/180;
-  int hx=cx+10*cos(a);
-  int hy=cy+10*sin(a);
+  int cx = 64, cy = 32;
 
-  display.drawLine(cx,cy,hx,hy,WHITE);
+  // Clock circle
+  display.drawCircle(cx, cy, 20, WHITE);
+
+  // Hour hand
+  float hourAngle = ((t.tm_hour % 12) + t.tm_min / 60.0) * 30 * PI / 180;
+  int hx = cx + 10 * cos(hourAngle);
+  int hy = cy + 10 * sin(hourAngle);
+
+  // Minute hand
+  float minAngle = t.tm_min * 6 * PI / 180;
+  int mx = cx + 15 * cos(minAngle);
+  int my = cy + 15 * sin(minAngle);
+
+  display.drawLine(cx, cy, hx, hy, WHITE);
+  display.drawLine(cx, cy, mx, my, WHITE);
 }
