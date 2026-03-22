@@ -1,14 +1,14 @@
 void handleInput(){
 
-  int y=analogRead(VRY_PIN);
+  int x=analogRead(VRX_PIN);
 
-  if(y<1000){
-    selectedIndex--;
+  if(x<1000){
+    selectedIndex++;
     lastActivity = millis();
   }
 
-  if(y>3000){
-    selectedIndex++;
+  if(x>3000){
+    selectedIndex--;
     lastActivity = millis();
   }
 

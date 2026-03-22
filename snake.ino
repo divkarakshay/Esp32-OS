@@ -16,25 +16,35 @@ void initSnake() {
 void updateSnake() {
   if (gameOver) return;
 
-  for(int i=len;i>0;i--){ sx[i]=sx[i-1]; sy[i]=sy[i-1]; }
+  // Move body
+  for(int i = len; i > 0; i--) { 
+    sx[i] = sx[i-1]; 
+    sy[i] = sy[i-1]; 
+  }
 
-  sx[0]+=dx; sy[0]+=dy;
+  // Move head
+  sx[0] += dx; 
+  sy[0] += dy;
 
-  if(sx[0]<0||sx[0]>=16||sy[0]<0||sy[0]>=8){
-    gameOver=true;
-    playGameOverSound();
-    saveGame(0, score);
-
-    if(score > highScore){
+  // 1. Check Wall Collision
+  if(sx[0] < 0 || sx[0] >= 16 || sy[0] < 0 || sy[0] >= 8) {
+    gameOver = true;
+    playGameOverSound(); // This must match the name in sound.ino
+    
+    if(score > highScore) {
       highScore = score;
       prefs.putInt("high", highScore);
     }
+    return; // Exit early if dead
   }
 
-  if(sx[0]==fx && sy[0]==fy){
-    len++; score++;
+  // 2. Check Food Collision
+  if(sx[0] == fx && sy[0] == fy) {
+    len++; 
+    score++;
     playEatSound();
-    fx=random(0,16); fy=random(0,8);
+    fx = random(0, 16); 
+    fy = random(0, 8);
   }
 }
 

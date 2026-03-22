@@ -6,9 +6,26 @@
 #include <BleGamepad.h>
 #include "time.h"
 
+// ---------- ADDED FORWARD DECLARATIONS ----------
+// This tells the compiler these exist in other tabs (sound.ino, snake.ino, etc.)
+void playGameOverSound(); 
+void playEatSound();
+void initSound();
+void initBluetooth();
+void sendBTControls();
+void handleInput();
+void drawScreen();
+void drawDigitalClock();
+void drawAnalogClock();
+void saveGame(int id, int s); // If you have a save function
+
+// ---------- GLOBAL VARIABLES ----------
+int highScore = 0; // Fixed: Defined here so snake.ino can see it
+
 // OLED
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+// We move the display declaration here so it's globally accessible
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // Pins
@@ -59,49 +76,53 @@ void setup(){
   pinMode(BTN_SHIFT,INPUT_PULLUP);
 
   Wire.begin(21,22);
-  display.begin(SSD1306_SWITCHCAPVCC,0x3C);
+  if(!display.begin(SSD1306_SWITCHCAPVCC,0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
+  }
 
-  prefs.begin("sys",false);
+  // Load High Score from memory on startup
+  prefs.begin("sys", false);
+  highScore = prefs.getInt("high", 0); 
 
   initSound();
-  initBluetooth();
+  initBluetooth(); // Commented out if not yet implemented in other tabs
 
   // Auto reconnect WiFi
-  String s=prefs.getString("ssid","");
-  String p=prefs.getString("pass","");
-  if(s!="") WiFi.begin(s.c_str(),p.c_str());
+  String s = prefs.getString("ssid","");
+  String p = prefs.getString("pass","");
+  if(s != "") WiFi.begin(s.c_str(), p.c_str());
 
-  configTime(19800,0,"pool.ntp.org");
+  configTime(19800, 0, "pool.ntp.org");
 
-  lastActivity=millis();
+  lastActivity = millis();
 }
 
 // ---------- LOOP ----------
 void loop(){
 
-  sendBTControls();
+  sendBTControls(); // Commented out if not yet implemented
 
   // 🕒 Idle detection
-  if(millis()-lastActivity > displayTimeout)
+  if(millis() - lastActivity > displayTimeout)
     dimmed = true;
   else
     dimmed = false;
 
-  // 🌙 Dim display
-  display.ssd1306_command(SSD1306_SETCONTRAST);
-  display.ssd1306_command(dimmed ? 10 : 255);
-
-  // 🕒 Always-on clock
-  if(dimmed){
+  // 🌙 Dim display logic
+  if(dimmed) {
     display.clearDisplay();
-
-    if(clockMode == 0)
-      drawDigitalClock();
-    else
-      drawAnalogClock();
-
+    display.ssd1306_command(SSD1306_SETCONTRAST);
+    display.ssd1306_command(10);
+    
+    if(clockMode == 0) drawDigitalClock();
+    else drawAnalogClock();
     display.display();
     return;
+  } else {
+    display.clearDisplay();
+    display.ssd1306_command(SSD1306_SETCONTRAST);
+    display.ssd1306_command(255);
   }
 
   handleInput();
